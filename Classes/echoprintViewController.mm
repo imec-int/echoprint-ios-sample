@@ -22,7 +22,7 @@
 	if(recording) {
 		recording = NO;
 		[recorder stopRecording];
-		[recordButton setTitle:@"Record" forState:UIControlStateNormal];
+		[recordButton setTitle:@"Listen" forState:UIControlStateNormal];
 		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *documentsDirectory = paths[0];
 		NSString *filePath =[documentsDirectory stringByAppendingPathComponent:@"output.caf"];
@@ -32,9 +32,11 @@
         NSString* fpCode = [FPGenerator generateFingerprintForFile:filePath];
         [self getSong:fpCode];
 	} else {
-		[statusLine setText:@"recording..."];
+		[statusLine setText:@"listening..."];
+        self.lblArtist.text = @"";
+        self.lblTrack.text = @"";
 		recording = YES;
-		[recordButton setTitle:@"Stop" forState:UIControlStateNormal];
+		[recordButton setTitle:@"Stop en analyze" forState:UIControlStateNormal];
 		[recorder startRecording];
 		[statusLine setNeedsDisplay];
 		[self.view setNeedsDisplay];
@@ -78,7 +80,7 @@
 - (void) getSong: (NSString*) fpCode {
 	NSLog(@"Done %@", fpCode);
 
-    NSString *apiString = [NSString stringWithFormat:@"http://%@/api/v4/song/identify?api_key=%@&version=4.11&code=%@&format=json", API_HOST, API_KEY, fpCode];
+    NSString *apiString = [NSString stringWithFormat:@"http://%@/query?version=4.12&code=%@", API_HOST, fpCode];
     
     NSURL *url = [NSURL URLWithString:apiString];
 	
@@ -90,13 +92,14 @@
 		NSString *response = [[NSString alloc] initWithData:[request responseData] encoding:NSUTF8StringEncoding];
         NSDictionary *dictionary = [NSJSONSerialization JSONObjectWithData:[response dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
 		NSLog(@"%@", dictionary);
-		NSArray *songList = dictionary[@"response"][@"songs"];
-		if([songList count]>0) {
-			NSString * song_title = songList[0][@"title"];
-			NSString * artist_name = songList[0][@"artist_name"];
+		if([[dictionary objectForKey:@"success"] boolValue] == true) {
+			NSString * song_title = dictionary[@"match"][@"track"];
+			NSString * artist_name = dictionary[@"match"][@"artist"];
+            self.lblArtist.text = artist_name;
+            self.lblTrack.text = song_title;
 			[statusLine setText:[NSString stringWithFormat:@"%@ - %@", artist_name, song_title]];
 		} else {
-			[statusLine setText:@"no match"];
+			[statusLine setText:@"No match, try a longer sample"];
 		}
 	} else {
 		[statusLine setText:@"some error"];
@@ -134,6 +137,8 @@
 
 
 - (void)dealloc {
+    [_lblArtist release];
+    [_lblTrack release];
     [super dealloc];
 }
 

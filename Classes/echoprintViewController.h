@@ -16,9 +16,8 @@
 #import "FPGenerator.h"
 
 
-// developer.echonest.com
-#define API_KEY @"GET_YOUR_OWN"
-#define API_HOST @"developer.echonest.com"
+// change this to the server where you are running https://github.com/mixbe/node-echoprint-server:
+#define API_HOST @"localhost:3000"
 
 @interface echoprintViewController : UIViewController <MPMediaPickerControllerDelegate> {
 	BOOL recording;
@@ -31,6 +30,8 @@
 - (IBAction)pickSong:(id)sender;
 - (IBAction)startMicrophone:(id)sender;
 - (void) getSong: (NSString*) fpCode;
+@property (retain, nonatomic) IBOutlet UILabel *lblArtist;
+@property (retain, nonatomic) IBOutlet UILabel *lblTrack;
 
 @end
 

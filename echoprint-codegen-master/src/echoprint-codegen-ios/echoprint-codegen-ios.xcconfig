@@ -5,4 +5,5 @@
 //  Created by Art Gillespie on 5/14/11.
 //
 
-HEADER_SEARCH_PATHS = /Users/[YOUR_USER_NAME]/path/to/boost
+// Change this to your path:
+HEADER_SEARCH_PATHS = /Users/sam/projects/magicbox/boost_1_55_0
